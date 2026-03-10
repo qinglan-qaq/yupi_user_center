@@ -63,6 +63,20 @@ public class userController {
         return userService.userLogin(userAccount, userPassword, httpServletRequest);
     }
 
+    @GetMapping("/current")
+    public User getCurrentUser(HttpServletRequest request){
+        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User)userObject;
+        if ( currentUser == null){
+            return null;
+        }
+        long userID = currentUser.getId();
+//        检测用户是否合法
+        User user = userService.getById(userID);
+        return userService.getSafetyUser(user);
+    }
+
+
     @GetMapping("/search")
     public List<User> searchUsers(String username,HttpServletRequest request) {
 //        权限判断

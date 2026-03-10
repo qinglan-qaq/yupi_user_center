@@ -125,6 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public User getSafetyUser(User originUser) {
+//        再加一层判断
         if (originUser == null) {
             return null;
         }
