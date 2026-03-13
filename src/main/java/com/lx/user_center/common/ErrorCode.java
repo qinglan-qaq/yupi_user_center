@@ -12,7 +12,8 @@ public enum ErrorCode {
     PARAMS_ERROR(4000,"请求参数错误",""),
     NULL_ERROR(4001,"请求参数为空",""),
     NO_LOGIN(4002,"未登录",""),
-    NO_AUTH(4003,"没有权限","");
+    NO_AUTH(4003,"没有权限",""),
+    SYSTEM_ERROR(5000,"系统内部异常","");
 
     /**
      * 状态码
