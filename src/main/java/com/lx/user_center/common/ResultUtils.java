@@ -11,8 +11,8 @@ public class ResultUtils {
     public static  <T> BaseResponse<T> success(T data){
         return new  BaseResponse<>(400,data,"success! 成功执行");
     }
-    public static <T> BaseResponse<T> fail(T data){
-        return new  BaseResponse<>(404,data,"fail! 执行失败");
+    public static <T> BaseResponse<T> error(ErrorCode errorCode){
+        return new  BaseResponse<>(errorCode);
     }
 
 }

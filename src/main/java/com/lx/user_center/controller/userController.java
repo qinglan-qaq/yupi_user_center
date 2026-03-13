@@ -2,6 +2,7 @@ package com.lx.user_center.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lx.user_center.common.BaseResponse;
+import com.lx.user_center.common.ErrorCode;
 import com.lx.user_center.common.ResultUtils;
 import com.lx.user_center.model.domain.User;
 import com.lx.user_center.model.domain.request.UserLoginRequest;
@@ -30,13 +31,14 @@ public class userController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-            return null;
+//            返回缺少 参数的错误
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return null;
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
 
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
@@ -55,13 +57,13 @@ public class userController {
     @PostMapping("/login")
     public BaseResponse<User> userlogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
         if (userLoginRequest == null) {
-            return null;
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
 
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
         System.out.println("login测试成功");
         User result = userService.userLogin(userAccount, userPassword, httpServletRequest);
@@ -73,7 +75,7 @@ public class userController {
         Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObject;
         if (currentUser == null) {
-            return null;
+            return ResultUtils.error(ErrorCode.NO_LOGIN);
         }
         long userID = currentUser.getId();
 //        检测用户是否合法
@@ -87,7 +89,7 @@ public class userController {
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
 //        权限判断
         if (isAdmin(request)) {
-            return null;
+            return ResultUtils.error(ErrorCode.NO_AUTH);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNoneBlank(username)) {
@@ -107,10 +109,10 @@ public class userController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
         if (isAdmin(request)) {
-            return null;
+            return ResultUtils.error(ErrorCode.NO_AUTH);
         }
         if (id <= 0) {
-            return null;
+            return ResultUtils.error(ErrorCode.NO_LOGIN);
         }
         boolean b = userService.removeById(id);
         return ResultUtils.success(b);

@@ -22,7 +22,7 @@ public enum ErrorCode {
      * 状态码信息
      */
     private final String message;
-    
+
     /**
      * 状态码信息描述
      */
@@ -32,5 +32,17 @@ public enum ErrorCode {
         this.code = code;
         this.message = message;
         this.description = description;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }
