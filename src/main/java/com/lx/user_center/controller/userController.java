@@ -1,6 +1,8 @@
 package com.lx.user_center.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lx.user_center.common.BaseResponse;
+import com.lx.user_center.common.ResultUtils;
 import com.lx.user_center.model.domain.User;
 import com.lx.user_center.model.domain.request.UserLoginRequest;
 import com.lx.user_center.model.domain.request.UserRegisterRequest;
@@ -26,7 +28,7 @@ public class userController {
     }
 
     @PostMapping("/register")
-    public Long userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
             return null;
         }
@@ -37,7 +39,9 @@ public class userController {
             return null;
         }
 
-        return userService.userRegister(userAccount, userPassword, checkPassword);
+        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        return ResultUtils.success(result);
+
 
     }
 
@@ -49,7 +53,7 @@ public class userController {
      * @return
      */
     @PostMapping("/login")
-    public User userlogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
+    public BaseResponse<User> userlogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
         if (userLoginRequest == null) {
             return null;
         }
@@ -60,27 +64,29 @@ public class userController {
             return null;
         }
         System.out.println("login测试成功");
-        return userService.userLogin(userAccount, userPassword, httpServletRequest);
+        User result = userService.userLogin(userAccount, userPassword, httpServletRequest);
+        return ResultUtils.success(result);
     }
 
     @GetMapping("/current")
-    public User getCurrentUser(HttpServletRequest request){
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User)userObject;
-        if ( currentUser == null){
+        User currentUser = (User) userObject;
+        if (currentUser == null) {
             return null;
         }
         long userID = currentUser.getId();
 //        检测用户是否合法
         User user = userService.getById(userID);
-        return userService.getSafetyUser(user);
+        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
     }
 
 
     @GetMapping("/search")
-    public List<User> searchUsers(String username,HttpServletRequest request) {
+    public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
 //        权限判断
-        if( isAdmin(request)){
+        if (isAdmin(request)) {
             return null;
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -88,20 +94,26 @@ public class userController {
             queryWrapper.like("username", username);
         }
 
-        List<User>userList= userService.list(queryWrapper);
-        return userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        List<User> userList = userService.list(queryWrapper);
+        List<User> list = userList.stream().map(
+                user -> userService.getSafetyUser(user)
+        ).collect(Collectors.toList());
+
+        return ResultUtils.success(list);
+
 
     }
 
     @PostMapping("/delete")
-    public boolean deleteUser(@RequestBody long id,HttpServletRequest request) {
-        if (isAdmin(request)){
-            return false;
+    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
+        if (isAdmin(request)) {
+            return null;
         }
         if (id <= 0) {
-            return false;
+            return null;
         }
-        return userService.removeById(id);
+        boolean b = userService.removeById(id);
+        return ResultUtils.success(b);
     }
 
     private boolean isAdmin(HttpServletRequest request) {
