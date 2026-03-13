@@ -2,6 +2,8 @@ package com.lx.user_center.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lx.user_center.common.ErrorCode;
+import com.lx.user_center.expection.BusinessExpection;
 import com.lx.user_center.mapper.UserMapper;
 import com.lx.user_center.model.domain.User;
 import com.lx.user_center.service.UserService;
@@ -40,29 +42,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
 //       校验合法性
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return -1;
+//            抛出异常并给出解释信息
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号密码或校验码为空");
         }
         if (userAccount.length() < 4) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"密码或校验码长度不合法");
         }
         // 账户不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (!matcher.find()) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号名称不合规");
         }
 //        校验密码是否相同
         if (!userPassword.equals(checkPassword)) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"密码校验码不相同");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         Long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"用户已存在");
         }
 //        加密
 //        final String SALT = "lx";
@@ -73,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         boolean saveResult = this.save(user);
         if (!saveResult) {
-            return -1;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账户未保存成功");
         }
         return user.getId();
     }
