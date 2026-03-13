@@ -92,7 +92,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userPassword.length() < 8) {
             return null;
         }
-        String validPattern = " [^~!@#$%^&*()+=|}':;',\\\\[\\\\].<>/?~! @#￥%.&* () —+|{} 【】 “;:";
+        String validPattern = "[^~!@#$%^&*()+=|}':;',\\\\[\\\\].<>/?~! @#￥%.&* () —+|{} 【】 “;:]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
             return null;
