@@ -43,29 +43,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 //       校验合法性
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
 //            抛出异常并给出解释信息
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号密码或校验码为空");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号密码或校验码为空");
         }
         if (userAccount.length() < 4) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号过短");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"密码或校验码长度不合法");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "密码或校验码长度不合法");
         }
         // 账户不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (!matcher.find()) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账号名称不合规");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号名称不合规");
         }
 //        校验密码是否相同
         if (!userPassword.equals(checkPassword)) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"密码校验码不相同");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "密码校验码不相同");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         Long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"用户已存在");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "用户已存在");
         }
 //        加密
 //        final String SALT = "lx";
@@ -76,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         boolean saveResult = this.save(user);
         if (!saveResult) {
-            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"账户未保存成功");
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账户未保存成功");
         }
         return user.getId();
     }
@@ -87,18 +87,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
 //       校验合法性
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号密码为空");
         }
         if (userAccount.length() < 4) {
-            return null;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号密码或校验码为空");
         }
         if (userPassword.length() < 8) {
-            return null;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号密码或校验码为空");
         }
         String validPattern = "[^~!@#$%^&*()+=|}':;',\\\\[\\\\].<>/?~! @#￥%.&* () —+|{} 【】 “;:]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
-            return null;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR, "账号不应含有特殊字符");
         }
 //        加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
@@ -109,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
             log.info("user login failed , userAccount cannot match userPassword");
-            return null;
+            throw new BusinessExpection(ErrorCode.PARAMS_ERROR,"用户不存在");
         }
 //        创建用户数据脱敏
         User safetyUser = getSafetyUser(user);

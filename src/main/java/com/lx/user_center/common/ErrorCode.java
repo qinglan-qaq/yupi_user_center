@@ -7,6 +7,7 @@ package com.lx.user_center.common;
  */
 public enum ErrorCode {
 
+//    message是简要消息 description是更详细的内容
     SUCCESS(0,"success",""),
     PARAMS_ERROR(4000,"请求参数错误",""),
     NULL_ERROR(4001,"请求参数为空",""),
